@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+	<title>Granular Synthesizer</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/png" sizes="174x174" href="./style/favicon.png">
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/13.3.8/Tone.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/draggabilly/2.2.0/draggabilly.pkgd.js"></script>
+	<script src="https://tonejs.github.io/Logo/build/Logo.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            font-family: 'Quicksand';
+            font-size: 1em;
+        }
+        #sampleSelection {
+            display: flex;
+            position: absolute;
+            justify-content: center;
+            bottom: 1em;
+            width: 100%;
+        }
+        #sampleSelection > div {
+            float: left; 
+            font-size: 1em; 
+            padding-right: 1em; 
+            transition-duration: 1s;
+            transition: font-size 2s;
+        }   
+        #sampleSelection > div:hover {
+            font-size: 1.5em; 
+        }
+        #controlWrapper { 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #label {
+            text-align: center;
+            width: 100%;
+            padding: .5em;
+        }
+        #controls {
+            border: 1px solid black;
+            padding: 1em;
+        }
+        #title {
+            position: absolute;
+            top 1em;
+            width: 100%;
+            text-align: center;
+            padding: .5em;
+        }
+        input {
+            -webkit-appearance: none;  /* Override default CSS styles */
+            appearance: none;
+            width: 100%; /* Full-width */
+            height: 1em; /* Specified height */
+            background: #FFFFFF; 
+            border: 1px solid black;
+        }
+        input::-webkit-slider-thumb {
+            -webkit-appearance: none; 
+            appearance: none;
+            width: 1px; 
+            height: 1.8em; 
+            background: #000000; 
+            cursor: pointer; 
+        }
+
+    
+    </style>
+</head>
+<body>
+    <div id="title">GRANULAR SYNTHESIZER</div>
+    <div id="sampleSelection">
+        <div id="arp" class="sample">ARP</div>
+        <div id="bass" class="sample">BASS</div>
+        <div id="electricPiano" class="sample">ELECTRIC PIANO</div>
+        <div id="guitar" class="sample">GUITAR</div>
+        <div id="pad" class="sample">PAD</div>
+        <div id="percussion" class="sample">PERCUSSION</div>
+    </div>
+    <div id="controlWrapper">
+        <div id="label">arp.wav</div>
+        <div id="controls">
+            Grain Size<input type="range" min="0.005" max="0.5" value="0.25" class="slider" id="grainSize" step="0.01"><br>
+            Detune<input type="range" min="-1200" max="1200" value="0" class="slider" id="detune" step="10"><br>
+            Playback Rate<input type="range" min="0.2" max="5" value="1" class="slider" id="playbackRate" step="0.05"><br>
+            Overlap<input type="range" min="0.01" max="2" value=".5" class="slider" id="overlap" step="0.025"><br>
+            Volume<input type="range" min="-50" max="12" value="0" class="slider" id="dryVolume" step="0.025"><br>
+        </div>
+        
+    </div>
+	<script>
+        $(document).ready(function(){            
+            //initial settings for granular synthesizer
+            var player = new Tone.GrainPlayer({
+                "url" : "http://ec2-18-217-11-218.us-east-2.compute.amazonaws.com/audio/samples/arp.wav",
+                "loop" : true,
+                "grainSize" : 0.1,
+                "overlap" : 0.05,
+            }).toMaster();
+                        
+            //function to handle sample changes
+            $(".sample").click(function() {
+                player.stop();
+                var urlString = "http://ec2-18-217-11-218.us-east-2.compute.amazonaws.com/audio/samples/";
+                urlString += $(this).attr("id");
+                urlString += ".wav";
+                player = new Tone.GrainPlayer({
+                    "url" : urlString,
+                    "loop" : true,
+                    "grainSize" : 0.1,
+                    "overlap" : 0.05,
+                }).toMaster();
+                player.url = urlString;
+                $("#label").html($(this).attr("id")+".wav");
+                player.start();
+            });
+
+            //function to handle paramater changes
+            $("input").mousemove(function() {
+                player.playbackRate = $("#playbackRate").val();
+                player.grainSize = $("#grainSize").val();
+                player.detune = $("#detune").val();
+                player.overlap = $("#overlap").val();
+                player.volume.value = $("#dryVolume").val();
+            });
+            
+            //begin audio
+            player.start();
+        });
+	</script>
+</body>
+</html>
